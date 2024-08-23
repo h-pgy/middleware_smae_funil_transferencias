@@ -53,7 +53,7 @@ class Downloader:
     def parse_to_pandas(self, csv_bytes:bytes)->pd.DataFrame:
 
 
-        return pd.read_csv(csv_bytes, sep=';', encoding='latin-1')
+        return pd.read_csv(csv_bytes, sep=';', encoding='utf-8')
 
     
 
