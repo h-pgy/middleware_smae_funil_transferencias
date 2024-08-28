@@ -5,12 +5,11 @@ from io import BytesIO
 from zipfile import ZipFile
 
 from core.utils.requests import max_retries_bytes_request
-
+from config import MAX_RETRIES
 
 USER_AGENT=('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)'
             ' Chrome/42.0.2311.135 Safari/537.36 Edge/12.246')
 
-MAX_RETRIES=3
 
 class Downloader:
 
@@ -25,6 +24,11 @@ class Downloader:
 
         self.get = partial(max_retries_bytes_request, session=self.session)
 
+        try:
+            self.max_retries = int(MAX_RETRIES)
+        except ValueError:
+            raise RuntimeError(f'A variável de ambiente MAX_RETRIES precisa ser um integer.')
+
     def __set_user_agent(self):
         
         self.session.headers['User-Agent'] = USER_AGENT
@@ -37,7 +41,7 @@ class Downloader:
     def download_and_unzip(self, url:str)->bytes:
 
         zip_bytes = BytesIO(
-                self.get(url=url, max_retries=MAX_RETRIES)
+                self.get(url=url, max_retries=self.max_retries)
                 )
         zip_in_mem = ZipFile(zip_bytes)
 

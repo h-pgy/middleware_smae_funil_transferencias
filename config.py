@@ -21,3 +21,4 @@ def load_env_var(varname:str)->Union[str, int, float, bool]:
     return variable
 
 DOWNLOAD_TTL_SECS = load_env_var('DOWNLOAD_TTL_SECS')
+MAX_RETRIES = load_env_var('MAX_RETRIES')
