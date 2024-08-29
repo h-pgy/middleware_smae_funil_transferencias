@@ -22,3 +22,18 @@ def load_env_var(varname:str)->Union[str, int, float, bool]:
 
 DOWNLOAD_TTL_SECS = load_env_var('DOWNLOAD_TTL_SECS')
 MAX_RETRIES = load_env_var('MAX_RETRIES')
+
+
+COLUNAS_DADOS = [
+    'COD_ORGAO_SUP_PROGRAMA',
+    'DESC_ORGAO_SUP_PROGRAMA',
+    'COD_PROGRAMA',
+    'NOME_PROGRAMA',
+    'SIT_PROGRAMA',
+    'DATA_DISPONIBILIZACAO',
+    'ANO_DISPONIBILIZACAO',
+    'DT_PROG_INI_RECEB_PROP',
+    'DT_PROG_FIM_RECEB_PROP',
+    'MODALIDADE_PROGRAMA',
+    'ACAO_ORCAMENTARIA'
+]
