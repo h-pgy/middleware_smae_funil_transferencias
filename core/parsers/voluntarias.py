@@ -107,7 +107,7 @@ class PropostasVoluntarias:
 
     def __rename_colunas(self):
 
-        self.programas.rename({col : col.lower() for col in COLUNAS_DADOS}, inplace=True)
+        self.programas.rename({col : col.lower() for col in COLUNAS_DADOS}, inplace=True, axis=1)
 
     def __pipeline(self):
 
