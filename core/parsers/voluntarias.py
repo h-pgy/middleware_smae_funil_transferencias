@@ -73,6 +73,15 @@ class PropostasVoluntarias:
         ids_programas_com_prop = self.programa_proponente[col_id].unique()
         self.programas['sem_proponente'] = self.programas[col_id].isin(ids_programas_com_prop)
 
+    def __para_estado_sp(self):
+
+        self.programas['para_sp'] = self.programas['UF_PROGRAMA']=='SP'
+
+    def __para_municipio(self):
+
+        para_muns = self.programas['NATUREZA_JURIDICA_PROGRAMA']=='Administração Pública Municipal'
+        self.programas['para_municipio'] = para_muns
+
     def __create_cols_filtros(self):
 
         self.__recebimento_iniciado()
@@ -81,6 +90,8 @@ class PropostasVoluntarias:
         self.__nao_e_emenda()
         self.__nao_e_proponente_especifico()
         self.__sem_proponente()
+        self.__para_estado_sp()
+        self.__para_municipio()
 
     def __filtro_final(self):
 
@@ -90,7 +101,9 @@ class PropostasVoluntarias:
             'programa_disponivel',
             'not_emenda',
             'not_prop_especifico',
-            'sem_proponente'
+            'sem_proponente',
+            'para_sp',
+            'para_municipio'
         ]
 
         self.programas['is_interesse'] = self.programas[colunas_filtros].all(axis=1)
