@@ -49,8 +49,9 @@ class DAO:
 
         return self.download(url, parse=True)
     
-    def __check_download_alive(self, last_download:Union[int, None])->bool:
+    def check_download_alive(self, table_name:str)->bool:
 
+        last_download = self.tables[table_name]['last_download']
         #pode ser None caso tenha acabado de instanciar a classe
         if last_download is None:
             return False
@@ -65,10 +66,10 @@ class DAO:
             raise TabelaIndisponivel(table_name)
 
         dados = self.tables[table_name]['data']
-        last_download = self.tables[table_name]['last_download']
-        if dados is not None and self.__check_download_alive(last_download):
+        if dados is not None and self.check_download_alive(table_name):
             return self.tables[table_name]['data']
         else:
+            print(f'Downloading table {table_name}')
             df = self.__download_table(table_name)
             self.tables[table_name]['data']=df
             self.tables[table_name]['last_download'] = agora_unix_timestamp()
