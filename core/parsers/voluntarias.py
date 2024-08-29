@@ -19,6 +19,13 @@ class PropostasVoluntarias:
         self.programas = self.dao.programas.copy(deep=True)
         self.programa_proponente = self.dao.programa_proponente.copy(deep=True)
         self.__colunas_dt()
+        self.__solve_ids()
+
+    def __solve_ids(self):
+
+        self.programas['ID_PROGRAMA'] = self.programas['ID_PROGRAMA'].astype(int)
+        self.programa_proponente['ID_PROGRAMA'] = self.programas['ID_PROGRAMA'].astype(int)
+        self.programa_proponente['ID_PROPONENTE'] = self.programa_proponente['ID_PROPONENTE'].astype(int)
 
     def __colunas_dt(self):
 
