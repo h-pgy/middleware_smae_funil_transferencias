@@ -1,0 +1,124 @@
+import pandas as pd
+
+from core.dao import DAO
+from core.utils.datetime import dmy_series_to_datetime
+from config import COLUNAS_DADOS
+
+class PropostasVoluntarias:
+
+    COLUNAS_DT_PRAZO = {'inicio' : 'DT_PROG_INI_RECEB_PROP', 
+                    'fim' : 'DT_PROG_FIM_RECEB_PROP'}
+
+    def __init__(self, dao_obj:DAO)->None:
+
+        self.dao = dao_obj
+        self.__set_tables()
+
+    def __set_tables(self):
+
+        self.programas = self.dao.programas.copy(deep=True)
+        self.programa_proponente = self.dao.programa_proponente.copy(deep=True)
+        self.__colunas_dt()
+
+    def __colunas_dt(self):
+
+        for col in self.COLUNAS_DT_PRAZO.values():
+            self.programas[col] = dmy_series_to_datetime(self.programas[col])
+            
+    def __recebimento_iniciado(self):
+
+        self.programas['recebimento_iniciado'] = self.programas[
+                                                    self.COLUNAS_DT_PRAZO['inicio']
+                                                    ]<=pd.Timestamp.today()
+
+    def __aux_fim_recebimento_vazio(self, row)->bool:
+
+        if row['recebimento_nao_finalizado'] == True:
+            return True
+
+        if pd.isnull(row[self.COLUNAS_DT_PRAZO['fim']]):
+            return True
+        
+        return False
+    
+    def __rebecimento_nao_finalizado(self):
+
+        self.programas['recebimento_nao_finalizado'] = self.programas[
+                                                        self.COLUNAS_DT_PRAZO['fim']
+                                                        ]>=pd.Timestamp.today()
+        self.programas['recebimento_nao_finalizado'] = self.programas.apply(self.__aux_fim_recebimento_vazio, axis=1)
+
+    def __programa_disponivel(self):
+
+        self.programas['programa_disponivel'] = self.programas['SIT_PROGRAMA']!='INATIVO'
+
+    def __nao_e_emenda(self):
+
+        self.programas['not_emenda'] = self.programas['DT_PROG_INI_EMENDA_PAR'].isnull()
+
+    def __nao_e_proponente_especifico(self):
+
+        self.programas['not_prop_especifico'] = self.programas['DT_PROG_INI_BENEF_ESP'].isnull()
+
+    def __sem_proponente(self):
+
+        col_id = 'ID_PROGRAMA'
+        ids_programas_com_prop = self.programa_proponente[col_id].unique()
+        self.programas['sem_proponente'] = self.programas[col_id].isin(ids_programas_com_prop)
+
+    def __create_cols_filtros(self):
+
+        self.__recebimento_iniciado()
+        self.__rebecimento_nao_finalizado()
+        self.__programa_disponivel()
+        self.__nao_e_emenda()
+        self.__nao_e_proponente_especifico()
+        self.__sem_proponente()
+
+    def __filtro_final(self):
+
+        colunas_filtros = [
+            'recebimento_iniciado',
+            'recebimento_nao_finalizado',
+            'programa_disponivel',
+            'not_emenda',
+            'not_prop_especifico',
+            'sem_proponente'
+        ]
+
+        self.programas['is_interesse'] = self.programas[colunas_filtros].all(axis=1)
+
+    def __filtrar(self):
+
+        self.__create_cols_filtros()
+        self.__filtro_final()
+        self.programas = self.programas[self.programas['is_interesse']].reset_index(drop=True)
+
+    def __selecionar_colunas(self):
+
+        self.programas = self.programas[COLUNAS_DADOS].copy()
+
+    def __rename_colunas(self):
+
+        self.programas.rename({col : col.lower() for col in COLUNAS_DADOS}, inplace=True)
+
+    def __pipeline(self):
+
+        if not self.dao.check_download_alive('programas'):
+            #reset tables if download is stale
+            self.__set_tables()
+
+        self.__filtrar()
+        self.__selecionar_colunas()
+        self.__rename_colunas()
+    
+    def __call__(self, json=True):
+
+        self.__pipeline()
+        if not json:
+            return self.programas
+        return self.programas.to_dict(orient='records')
+
+        
+
+        
