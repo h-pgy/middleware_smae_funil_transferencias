@@ -26,12 +26,12 @@ class ProponenteEspecifico:
     def __solve_ids(self):
 
         self.programas['ID_PROGRAMA'] = self.programas['ID_PROGRAMA'].astype(int)
-        self.programa_proponente['ID_PROGRAMA'] = self.programas['ID_PROGRAMA'].astype(int)
+        self.programa_proponente['ID_PROGRAMA'] = self.programa_proponente['ID_PROGRAMA'].astype(int)
         self.programa_proponente['ID_PROPONENTE'] = self.programa_proponente['ID_PROPONENTE'].astype(int)
 
     def __filtrar_proponente_sp(self):
 
-        proponente_is_sp = self.programa_proponente['ID_PROPONENTE']==COD_PROPONENTE_CIDADE
+        proponente_is_sp = self.programa_proponente['ID_PROPONENTE']==int(COD_PROPONENTE_CIDADE)
         
         if proponente_is_sp.sum()<1:
             print('Não há nenhuma proposta com São Paulo como proponente.')

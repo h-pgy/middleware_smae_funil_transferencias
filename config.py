@@ -39,6 +39,6 @@ COLUNAS_DADOS = [
 ]
 
 try:
-    COD_PROPONENTE_CIDADE = int(load_dotenv('COD_PROPONENTE_CIDADE'))
+    COD_PROPONENTE_CIDADE = int(load_env_var('COD_PROPONENTE_CIDADE'))
 except ValueError:
     raise RuntimeError('Variável de ambiente COD_PROPONENTE_CIDADE deve ser integer.')
