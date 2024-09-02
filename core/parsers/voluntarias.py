@@ -71,7 +71,7 @@ class PropostasVoluntarias:
 
         col_id = 'ID_PROGRAMA'
         ids_programas_com_prop = self.programa_proponente[col_id].unique()
-        self.programas['sem_proponente'] = self.programas[col_id].isin(ids_programas_com_prop)
+        self.programas['sem_proponente'] = ~self.programas[col_id].isin(ids_programas_com_prop)
 
     def __para_estado_sp(self):
 
