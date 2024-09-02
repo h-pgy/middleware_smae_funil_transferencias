@@ -116,9 +116,18 @@ class PropostasVoluntarias:
 
     def __selecionar_colunas(self):
 
-        self.programas = self.programas[COLUNAS_DADOS].copy()
+        colunas_lower =  [col.lower() for col in COLUNAS_DADOS]
+        self.programas = self.programas[colunas_lower].copy()
 
     def __rename_colunas(self):
+
+        remapped = {val : col for col, val in self.COLUNAS_DT_PRAZO.items()}
+        for col in self.programas.columns:
+            if col in remapped:
+                if remapped[col]=='fim':
+                    self.programas.rename({col : 'DT_FIM_RECEB'}, axis=1, inplace=True)
+                if remapped[col]=='inicio':
+                    self.programas.rename({col : 'DT_INI_RECEB'}, axis=1, inplace=True)
 
         self.programas.rename({col : col.lower() for col in COLUNAS_DADOS}, inplace=True, axis=1)
 
@@ -129,8 +138,9 @@ class PropostasVoluntarias:
             self.__set_tables()
 
         self.__filtrar()
-        self.__selecionar_colunas()
         self.__rename_colunas()
+        self.__selecionar_colunas()
+
     
     def __call__(self, json=True):
 
