@@ -15,4 +15,3 @@ class TabelaIndisponivel(HTTPException):
         detail = f'Tabela {tabela} nao foi implementada no scrapper.'
 
         super().__init__(status_code=400, detail=detail, headers=headers)
-
