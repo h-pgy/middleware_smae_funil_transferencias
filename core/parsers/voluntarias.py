@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+from typing import Union
 
 from core.dao import DAO
 from core.utils.datetime import dmy_series_to_datetime
@@ -13,6 +15,7 @@ class PropostasVoluntarias:
 
         self.dao = dao_obj
         self.__set_tables()
+        self.final_result=None
 
     def __set_tables(self):
 
@@ -20,6 +23,11 @@ class PropostasVoluntarias:
         self.programa_proponente = self.dao.programa_proponente.copy(deep=True)
         self.__colunas_dt()
         self.__solve_ids()
+        self.__fill_na_to_none()
+
+    def __fill_na_to_none(self):
+
+        self.programas = self.programas.replace({np.nan: None})
 
     def __solve_ids(self):
 
@@ -131,7 +139,7 @@ class PropostasVoluntarias:
 
         self.programas.rename({col : col.lower() for col in COLUNAS_DADOS}, inplace=True, axis=1)
 
-    def __pipeline(self):
+    def __pipeline(self, json:bool):
 
         if not self.dao.check_download_alive('programas'):
             #reset tables if download is stale
@@ -140,14 +148,22 @@ class PropostasVoluntarias:
         self.__filtrar()
         self.__rename_colunas()
         self.__selecionar_colunas()
-
-    
-    def __call__(self, json=True):
-
-        self.__pipeline()
         if not json:
             return self.programas
         return self.programas.to_dict(orient='records')
+
+    def __cached(self, json:bool=True)->Union[dict, pd.DataFrame]:
+
+        if self.final_result is None:
+            self.final_result = self.__pipeline(json)
+        if not self.dao.check_download_alive:
+            self.final_result = self.__pipeline(json)
+
+        return self.final_result
+    
+    def __call__(self, json:bool=True):
+
+        return self.__cached(json)
 
         
 
