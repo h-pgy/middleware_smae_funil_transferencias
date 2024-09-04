@@ -1,12 +1,11 @@
 import pandas as pd
-
-from typing import Union
+import requests
+from requests.exceptions import HTTPError
 
 from core.scrap import download
 from core.utils.requests import UrlBuildeR
 from core.utils.datetime import agora_unix_timestamp
-from core.exceptions import TabelaIndisponivel
-
+from core.exceptions import TabelaIndisponivel, UpstreamError
 from config import DOWNLOAD_TTL_SECS
 
 DOMAIN='repositorio.dados.gov.br'
@@ -16,6 +15,8 @@ MAPPER_TABELAS = {
     'programas' : 'siconv_programa.csv.zip',
     'programa_proponente' : 'siconv_programa_proponentes.csv.zip'
 }
+
+ULTIMA_ATUALIZACAO='data_carga_siconv.txt'
 
 class DAO:
 
@@ -85,6 +86,21 @@ class DAO:
     def programa_proponente(self)->pd.DataFrame:
 
         return self.__cached_download('programa_proponente')
+
+    @property
+    def ultima_atualizacao(self)->str:
+
+        url = self.build_url(namespace=NAMESPACE, endpoint=ULTIMA_ATUALIZACAO)
+        with requests.get(url) as r:
+            try:
+                r.raise_for_status()
+                return r.text
+            except HTTPError as err:
+                erro = str(err)
+                code = r.status_code
+                error_msg = f'Ultima atualizacao indisponível.Erro: {erro}. Code: {code}'
+                raise UpstreamError(error_msg)
+
         
         
 
